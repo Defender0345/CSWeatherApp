@@ -1,0 +1,100 @@
+﻿@page "/"
+
+@inject IHttpClientFactory _clientFactory;
+
+<PageTitle>Index</PageTitle>
+
+<h2>Weather Info</h2>
+<input type="text" @bind-value="inputText" />
+<button @onclick="SearchBtn">Search</button>
+<h3>Search: @searchTerm</h3>
+
+@if (string.IsNullOrWhiteSpace(errorString) == false)
+{
+    <div class="h2">
+        @errorString
+    </div>
+}
+else if (info is null)
+{
+    <div class="h4">Loading...</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Weather State</th>
+                <th>Description</th>
+                <th>Country</th>
+                <th>Current Temp</th>
+                <th>Min-Temp</th>
+                <th>Max-Temp</th>
+                <th>Feels Like</th>
+                <th>Wind Speed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @foreach (var w in info.weather)
+                {
+                    <td>@w.main</td>
+                    <td>@w.description</td>
+                }
+                <td>@info.sys.country</td>
+                <td>@info.main.temp</td>
+                <td>@info.main.temp_min</td>
+                <td>@info.main.temp_max</td>
+                <td>@info.main.feels_like</td>
+                <td>@info.wind.speed</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    WeatherInfoModel info;
+    string errorString;
+    string APIKey = "884119ec5577be609d2842344915fd41";
+    string inputText;
+    string searchTerm = "London";
+
+    private async void SearchBtn()
+    {
+        FixSearchTerm(inputText);
+        searchTerm = inputText;
+        await FetchWeatherData(searchTerm);
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchWeatherData(searchTerm);
+
+        StateHasChanged();
+    }
+
+    private async Task FetchWeatherData(string location)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.openweathermap.org/data/2.5/weather?q={location}&units=metric&appid={APIKey}");
+
+        var client = _clientFactory.CreateClient();
+
+        HttpResponseMessage response = await client.SendAsync(request);
+
+        if(response.IsSuccessStatusCode)
+        {
+            info = await response.Content.ReadFromJsonAsync<WeatherInfoModel>();
+            errorString = null;
+        }
+        else
+        {
+            errorString = $"{response.StatusCode}";
+        }
+    }
+
+    private string FixSearchTerm(string inputTerm)
+    {
+        return string.Join("%20", inputTerm.Split(' '));
+    }
+}
