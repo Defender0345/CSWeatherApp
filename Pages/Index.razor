@@ -5,9 +5,12 @@
 <PageTitle>Index</PageTitle>
 
 <h2>Weather Info</h2>
-<input type="text" @bind-value="inputText" />
-<button @onclick="SearchBtn">Search</button>
-<h3>Search: @searchTerm</h3>
+<div class="input-group mb-3">
+    <input type="text" @bind-value="inputText" />
+    <div class="input-group-append">
+        <button class="btn btn-outline-primary" @onclick="SearchBtn">Search</button>
+    </div>
+</div>
 
 @if (string.IsNullOrWhiteSpace(errorString) == false)
 {
@@ -21,35 +24,57 @@ else if (info is null)
 }
 else
 {
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Weather State</th>
-                <th>Description</th>
-                <th>Country</th>
-                <th>Current Temp</th>
-                <th>Min-Temp</th>
-                <th>Max-Temp</th>
-                <th>Feels Like</th>
-                <th>Wind Speed</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                @foreach (var w in info.weather)
-                {
-                    <td>@w.main</td>
-                    <td>@w.description</td>
-                }
-                <td>@info.sys.country</td>
-                <td>@info.main.temp</td>
-                <td>@info.main.temp_min</td>
-                <td>@info.main.temp_max</td>
-                <td>@info.main.feels_like</td>
-                <td>@info.wind.speed</td>
-            </tr>
-        </tbody>
-    </table>
+    <section>
+        <div class="container py-5 h-100">
+
+            <div class="row d-flex justify-content-left align-items-center h-100">
+                <div class="col-md-8 col-lg-6 col-xl-4">
+
+                    <div class="card" style="color: #4B515D; border-radius: 35px;">
+                        <div class="card-body p-4">
+
+                            <div class="d-flex">
+                                <h5 class="flex-grow-1">@searchTerm</h5>
+                                <h5>@info.sys.country</h5>
+                            </div>
+
+                            <div class="d-flex flex-column text-center mt-5 mb-4">
+                                <h6 class="display-4 mb-0 font-weight-bold" style="color: #1C2331;"> @info.main.temp &#8451 </h6>
+                                @foreach (var w in info.weather)
+                                {
+                                    <span class="small" style="color: #868B94">@w.main</span>
+                                    <span class="small" style="color: #868B94">@w.description</span>
+                                } 
+                            </div>
+
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1" style="font-size: 1rem;">
+                                    <div>
+                                        <span class="ms-1">
+                                            Feels Like: @info.main.feels_like &#8451
+                                            
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="ms-1">Min: @info.main.temp_min &#8451</span>
+                                    </div>
+                                    <div>
+                                        <span class="ms-1">Max: @info.main.temp_max &#8451</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="ms-1">Wind: @info.wind.speed km/h</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
 }
 
 @code {
